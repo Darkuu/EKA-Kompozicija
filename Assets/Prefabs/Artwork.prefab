@@ -107,6 +107,10 @@ MonoBehaviour:
   isValid: 0
   isGraded: 0
   wasGradedCorrectly: 0
+  stampingTool: {fileID: 0}
+  blockLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!50 &5765466480055416430
 Rigidbody2D:
   serializedVersion: 5

@@ -1,49 +1,62 @@
 using UnityEngine;
+using UnityEngine.EventSystems;  // Required for checking UI interaction
 
 public class Artwork : MonoBehaviour
 {
     [Header("User Defined Properties")]
-    [Tooltip("The color name of the artwork")]
     public string colorName;
-
-    [Tooltip("The style of the artwork")]
     public string style;
-
-    [Tooltip("Indicates whether the artwork meets the current valid color criteria")]
     public bool isValid;
-
-    [Header("Grading Properties")]
-    [Tooltip("Tracks if the artwork has been graded")]
     public bool isGraded = false;
-
-    [Tooltip("Tracks if the artwork was graded correctly")]
     public bool wasGradedCorrectly = false;
 
+    [Header("Drag Settings")]
     private bool isDragging = false;
     private Vector3 offset;
 
+    // LayerMask to ignore layers when we are trying to drag
+    public LayerMask blockLayer; // Use this to specify the layer of objects that block dragging (e.g., StampingTool)
+
+    private Camera mainCamera;
+
+    private void Start()
+    {
+        mainCamera = Camera.main;  // Get the main camera
+    }
+
     private void Update()
     {
-        CheckValidity();
         HandleDrag();
     }
 
-    /// <summary>
-    /// Checks the validity of the artwork based on the current valid color.
-    /// </summary>
-    private void CheckValidity()
+    // Check if we can drag the artwork
+    private bool CanDragArtwork()
     {
-        if (RatingManager.instance != null)
+        // Ignore if the mouse is over any UI element (like a button)
+        if (EventSystem.current.IsPointerOverGameObject())  // Checks if the pointer is over a UI element
         {
-            string currentValidColor = RatingManager.instance.currentValidColor;
-            isValid = !string.IsNullOrEmpty(colorName) && colorName.Equals(currentValidColor, System.StringComparison.OrdinalIgnoreCase);
+            return false;
         }
+
+        // Check if the mouse is over the stamping tool
+        RaycastHit2D hit = Physics2D.Raycast(GetMouseWorldPosition(), Vector2.zero, Mathf.Infinity, blockLayer);
+        
+        // If we hit an object on the block layer (like the stamping tool), prevent dragging
+        if (hit.collider != null)
+        {
+            return false;
+        }
+
+        return true; // Allow dragging if nothing blocks it
     }
 
     private void OnMouseDown()
     {
-        isDragging = true;
-        offset = transform.position - GetMouseWorldPosition();
+        if (CanDragArtwork())  // Only allow dragging if nothing is blocking the raycast
+        {
+            isDragging = true;
+            offset = transform.position - GetMouseWorldPosition();
+        }
     }
 
     private void OnMouseUp()
@@ -62,7 +75,7 @@ public class Artwork : MonoBehaviour
     private Vector3 GetMouseWorldPosition()
     {
         Vector3 mouseScreenPosition = Input.mousePosition;
-        mouseScreenPosition.z = Camera.main.WorldToScreenPoint(transform.position).z;
-        return Camera.main.ScreenToWorldPoint(mouseScreenPosition);
+        mouseScreenPosition.z = mainCamera.WorldToScreenPoint(transform.position).z;
+        return mainCamera.ScreenToWorldPoint(mouseScreenPosition);
     }
 }

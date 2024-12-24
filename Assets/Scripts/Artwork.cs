@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.EventSystems;  // Required for checking UI interaction
+using UnityEngine.EventSystems;
 
 public class Artwork : MonoBehaviour
 {
@@ -14,14 +14,14 @@ public class Artwork : MonoBehaviour
     private bool isDragging = false;
     private Vector3 offset;
 
-    // LayerMask to ignore layers when we are trying to drag
-    public LayerMask blockLayer; // Use this to specify the layer of objects that block dragging (e.g., StampingTool)
+    [Tooltip("Specify the LayerMask for objects that block dragging (e.g., StampingTool)")]
+    public LayerMask blockLayer;
 
     private Camera mainCamera;
 
     private void Start()
     {
-        mainCamera = Camera.main;  // Get the main camera
+        mainCamera = Camera.main;
     }
 
     private void Update()
@@ -29,30 +29,28 @@ public class Artwork : MonoBehaviour
         HandleDrag();
     }
 
-    // Check if we can drag the artwork
+    /// <summary>
+    /// Determines if the artwork can be dragged.
+    /// </summary>
+    /// <returns>True if draggable; false otherwise.</returns>
     private bool CanDragArtwork()
     {
-        // Ignore if the mouse is over any UI element (like a button)
-        if (EventSystem.current.IsPointerOverGameObject())  // Checks if the pointer is over a UI element
+        // Check if the pointer is over a UI element
+        if (EventSystem.current.IsPointerOverGameObject())
         {
             return false;
         }
 
-        // Check if the mouse is over the stamping tool
-        RaycastHit2D hit = Physics2D.Raycast(GetMouseWorldPosition(), Vector2.zero, Mathf.Infinity, blockLayer);
-        
-        // If we hit an object on the block layer (like the stamping tool), prevent dragging
-        if (hit.collider != null)
-        {
-            return false;
-        }
+        // Perform a raycast to detect blocking objects
+        Vector2 mousePosition = GetMouseWorldPosition();
+        RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero, Mathf.Infinity, blockLayer);
 
-        return true; // Allow dragging if nothing blocks it
+        return hit.collider == null; // Allow dragging if nothing is blocking
     }
 
     private void OnMouseDown()
     {
-        if (CanDragArtwork())  // Only allow dragging if nothing is blocking the raycast
+        if (CanDragArtwork())
         {
             isDragging = true;
             offset = transform.position - GetMouseWorldPosition();

@@ -9,13 +9,12 @@ public class StampingTool : MonoBehaviour
     public Rating ratingType;
 
     [Tooltip("The trigger zone that the stamp evaluates")]
-    public GameObject triggerZoneObject;  // Reference to a separate GameObject that acts as the trigger zone
+    public GameObject triggerZoneObject;
 
-    private Collider2D triggerZone;  // Reference to the Collider2D of the trigger zone
+    private Collider2D triggerZone;
 
     private void Start()
     {
-        // Get the Collider2D component from the trigger zone object
         triggerZone = triggerZoneObject.GetComponent<Collider2D>();
 
         if (triggerZone == null)
@@ -26,19 +25,16 @@ public class StampingTool : MonoBehaviour
 
     private void OnMouseDown()
     {
-        // Check if the GameObject is clicked (assuming it's 2D or 3D with collider)
         Debug.Log("Stamp clicked! Grading artworks in the zone.");
         GradeArtworksInZone();
     }
 
     private void GradeArtworksInZone()
     {
-        // Get all the colliders in the trigger zone
         Collider2D[] collidersInZone = Physics2D.OverlapBoxAll(triggerZone.bounds.center, triggerZone.bounds.size, 0f);
 
         foreach (Collider2D collider in collidersInZone)
         {
-            // Check if the object has the "Artwork" tag
             if (collider.CompareTag("Artwork"))
             {
                 Artwork artwork = collider.GetComponent<Artwork>();
@@ -52,14 +48,13 @@ public class StampingTool : MonoBehaviour
 
     private void EvaluateArtwork(Artwork artwork)
     {
-        // Set the artwork as graded
-        artwork.isGraded = true;  // This marks the artwork as graded.
+        artwork.isGraded = true;
 
-        // Check if the artwork is valid based on the stamp's rating type
-        bool isCorrect = (ratingType == Rating.Yes && artwork.isValid) ||
-                         (ratingType == Rating.No && !artwork.isValid);
+        // Check grading correctness
+        artwork.wasGradedCorrectly = (ratingType == Rating.Yes && artwork.isValid) ||
+                                     (ratingType == Rating.No && !artwork.isValid);
 
-        if (isCorrect)
+        if (artwork.wasGradedCorrectly)
         {
             Debug.Log("Correct rating for " + artwork.gameObject.name);
         }

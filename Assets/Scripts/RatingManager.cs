@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro; // Import TextMeshPro namespace
+using UnityEngine.SceneManagement; // Required for FindObjectsSortMode
 
 public class RatingManager : MonoBehaviour
 {
@@ -39,6 +40,9 @@ public class RatingManager : MonoBehaviour
     {
         currentValidStyle = GetRandomValidStyle(); // Set a new valid style
         UpdateValidStyleDisplay(); // Update the UI
+
+        // Update all artworks in the scene with the new valid style
+        UpdateAllArtworkValidity();
     }
 
     /// <summary>
@@ -58,11 +62,28 @@ public class RatingManager : MonoBehaviour
     {
         if (validStyleText != null)
         {
-            validStyleText.text = $"Painting's main style must be {currentValidStyle.ToUpper()}";
+            validStyleText.text = $"Painting's main style must be {currentValidStyle}";
         }
         else
         {
             Debug.LogWarning("ValidStyleText is not assigned in the RatingManager!");
+        }
+    }
+
+    /// <summary>
+    /// Updates the validity of all artwork objects in the scene.
+    /// </summary>
+    private void UpdateAllArtworkValidity()
+    {
+        // Find all Artwork objects in the scene
+        Artwork[] artworks = FindObjectsByType<Artwork>(FindObjectsSortMode.None);
+
+        foreach (Artwork artwork in artworks)
+        {
+            artwork.isValid = artwork.style == currentValidStyle;
+
+            // Optionally, you can trigger any other behavior based on validity
+            Debug.Log($"Artwork {artwork.name} is {(artwork.isValid ? "valid" : "invalid")} for style {currentValidStyle}.");
         }
     }
 }

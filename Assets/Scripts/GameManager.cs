@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -8,12 +9,14 @@ public class GameManager : MonoBehaviour
     [Header("Game Settings")]
     [SerializeField] private float initialTime = 60f; // Starting time in seconds
     [SerializeField] private float spawnInterval = 10f; // Interval for spawning artwork
+    [SerializeField] private float styleUnlockInterval = 30f; // Time in seconds to unlock a new style
 
     [Header("UI Elements")]
     public GameObject[] artworkPrefabs; // Array of artwork prefabs
     public Transform spawnLocation; // Where to spawn the artwork
     public GameObject gameOverPanel; // Panel to display when the game ends
     public TextMeshProUGUI scoreText; // TMP Text for displaying the score
+    public TextMeshProUGUI styleUnlockText; // TMP Text for style unlock notifications
     public Slider timerSlider; // UI Slider for the timer
 
     [Header("References")]
@@ -21,6 +24,10 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private float timer; // Game timer, editable in the Editor during runtime
     private bool gameRunning = true;
+
+    private string[] validStyles = { "Realistic", "Cartoon", "Cubic", "Jugendstil" };
+    private List<string> unlockedStyles = new List<string>(); // Keep track of unlocked styles
+    private int currentIndex = 0; // Index to track the current artwork
 
     private void Start()
     {
@@ -34,6 +41,10 @@ public class GameManager : MonoBehaviour
             timerSlider.value = initialTime;
         }
 
+        // Begin unlocking styles as the game progresses
+        StartCoroutine(UnlockStyles());
+
+        // Begin spawning artworks and running the game timer
         StartCoroutine(SpawnArtwork());
         StartCoroutine(GameTimer());
     }
@@ -44,10 +55,40 @@ public class GameManager : MonoBehaviour
         {
             yield return new WaitForSeconds(spawnInterval);
 
-            // Choose a random artwork from the array
-            GameObject selectedArtwork = artworkPrefabs[Random.Range(0, artworkPrefabs.Length)];
+            // Select artwork, no locking of artworks, just focus on styles
+            GameObject selectedArtwork = artworkPrefabs[currentIndex];
             Instantiate(selectedArtwork, spawnLocation.position, Quaternion.identity);
+
+            currentIndex++;
+            if (currentIndex >= artworkPrefabs.Length) currentIndex = 0;
         }
+    }
+
+    private IEnumerator UnlockStyles()
+    {
+        // Unlock each style progressively after the interval
+        for (int i = 0; i < validStyles.Length; i++)
+        {
+            yield return new WaitForSeconds(styleUnlockInterval);
+
+            string newStyle = validStyles[i];
+            unlockedStyles.Add(newStyle); // Add the style to the unlocked list
+
+            if (styleUnlockText != null)
+            {
+                styleUnlockText.text = $"New style unlocked: {newStyle}";
+                styleUnlockText.gameObject.SetActive(true);
+
+                // Hide the notification after 3 seconds
+                StartCoroutine(HideStyleUnlockNotification());
+            }
+        }
+    }
+
+    private IEnumerator HideStyleUnlockNotification()
+    {
+        yield return new WaitForSeconds(3f);
+        styleUnlockText.gameObject.SetActive(false);
     }
 
     private IEnumerator GameTimer()
@@ -105,5 +146,11 @@ public class GameManager : MonoBehaviour
     public bool IsGameRunning()
     {
         return gameRunning;
+    }
+
+    // Method to check if a style is unlocked
+    public bool IsStyleUnlocked(string style)
+    {
+        return unlockedStyles.Contains(style);
     }
 }

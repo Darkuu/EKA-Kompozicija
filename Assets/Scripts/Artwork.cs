@@ -21,6 +21,12 @@ public class Artwork : MonoBehaviour
     private void Start()
     {
         mainCamera = Camera.main;
+
+        // Validate style on initialization
+        if (RatingManager.instance != null)
+        {
+            ValidateStyle();
+        }
     }
 
     private void Update()
@@ -28,23 +34,22 @@ public class Artwork : MonoBehaviour
         HandleDrag();
     }
 
-    /// <summary>
-    /// Determines if the artwork can be dragged.
-    /// </summary>
-    /// <returns>True if draggable; false otherwise.</returns>
+    public void ValidateStyle()
+    {
+        isValid = string.Equals(style, RatingManager.instance.currentValidStyle, System.StringComparison.OrdinalIgnoreCase);
+    }
+
     private bool CanDragArtwork()
     {
-        // Check if the pointer is over a UI element
         if (EventSystem.current.IsPointerOverGameObject())
         {
             return false;
         }
 
-        // Perform a raycast to detect blocking objects
         Vector2 mousePosition = GetMouseWorldPosition();
         RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero, Mathf.Infinity, blockLayer);
 
-        return hit.collider == null; // Allow dragging if nothing is blocking
+        return hit.collider == null;
     }
 
     private void OnMouseDown()

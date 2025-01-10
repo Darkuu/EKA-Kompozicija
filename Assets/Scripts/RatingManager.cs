@@ -5,12 +5,12 @@ public class RatingManager : MonoBehaviour
 {
     public static RatingManager instance;
 
-    [Header("Valid Color Settings")]
-    [Tooltip("Current valid color for the day")]
-    public string currentValidColor;
+    [Header("Valid Style Settings")]
+    [Tooltip("Current valid style for the day")]
+    public string currentValidStyle;
 
-    [Tooltip("TextMeshProUGUI component displaying the current valid color")]
-    public TextMeshProUGUI validColorText;
+    [Tooltip("TextMeshProUGUI component displaying the current valid style")]
+    public TextMeshProUGUI validStyleText;
 
     [Header("Day Timer Settings")]
     [Tooltip("Duration of each day in seconds")]
@@ -33,36 +33,36 @@ public class RatingManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Changes the requirements by selecting a new valid color and updating the UI.
+    /// Changes the requirements by selecting a new valid style and updating the UI.
     /// </summary>
     private void ChangeRequirements()
     {
-        currentValidColor = GetRandomValidColor(); // Set a new valid color
-        UpdateValidColorDisplay(); // Update the UI
+        currentValidStyle = GetRandomValidStyle(); // Set a new valid style
+        UpdateValidStyleDisplay(); // Update the UI
     }
 
     /// <summary>
-    /// Selects a random valid color from the predefined list.
+    /// Selects a random valid style from the predefined list.
     /// </summary>
-    /// <returns>A random valid color</returns>
-    private string GetRandomValidColor()
+    /// <returns>A random valid style</returns>
+    private string GetRandomValidStyle()
     {
-        string[] validColors = { "red", "green", "blue", "purple" }; // Add or modify colors as needed
-        return validColors[Random.Range(0, validColors.Length)];
+        string[] validStyles = { "Realistic", "Cartoon", "Cubic", "Jugendstil" }; 
+        return validStyles[Random.Range(0, validStyles.Length)];
     }
 
     /// <summary>
-    /// Updates the TextMeshProUGUI component to display the current valid color.
+    /// Updates the TextMeshProUGUI component to display the current valid style.
     /// </summary>
-    private void UpdateValidColorDisplay()
+    private void UpdateValidStyleDisplay()
     {
-        if (validColorText != null)
+        if (validStyleText != null)
         {
-            validColorText.text = $"Today's Paintings must be mainly made of the color <color={currentValidColor}>{currentValidColor.ToUpper()}</color>";
+            validStyleText.text = $"Painting's main style must be {currentValidStyle.ToUpper()}";
         }
         else
         {
-            Debug.LogWarning("ValidColorText is not assigned in the RatingManager!");
+            Debug.LogWarning("ValidStyleText is not assigned in the RatingManager!");
         }
     }
 }

@@ -23,12 +23,10 @@ public class SubmissionZone : MonoBehaviour
         {
             moneyManager.AddMoney(100f);
             gameManager.ModifyTimer(correctArtworkTimeBonus);
-            Debug.Log("Correct submission! Added money and bonus time.");
         }
         else
         {
             gameManager.ModifyTimer(incorrectArtworkTimePenalty);
-            Debug.Log("Incorrect submission! Time penalty applied.");
         }
 
         Destroy(artwork.gameObject);

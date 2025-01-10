@@ -4,7 +4,6 @@ using UnityEngine.EventSystems;
 public class Artwork : MonoBehaviour
 {
     [Header("User Defined Properties")]
-    public string colorName;
     public string style;
     public bool isValid;
     public bool isGraded = false;

@@ -4,7 +4,9 @@ public class ClickMoveInOut : MonoBehaviour
 {
     public Vector3 inPosition;  
     public Vector3 outPosition; 
-    public float moveSpeed = 5f; 
+    public float moveSpeed = 5f;
+    public AudioSource moveSoundin;
+    public AudioSource moveSoundout;
     private bool isMovingOut = false; 
 
     public GameObject otherObject; 
@@ -25,10 +27,13 @@ public class ClickMoveInOut : MonoBehaviour
         if (isMovingOut)
         {
             transform.position = Vector3.MoveTowards(transform.position, outPosition, moveSpeed * Time.deltaTime);
+            moveSoundout.Play();
         }
         else
         {
             transform.position = Vector3.MoveTowards(transform.position, inPosition, moveSpeed * Time.deltaTime);
+            moveSoundin.Play();
+
         }
     }
 }

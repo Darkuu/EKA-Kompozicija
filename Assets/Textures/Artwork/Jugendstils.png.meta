@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Jugendstils_0: -2405411953904585678
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

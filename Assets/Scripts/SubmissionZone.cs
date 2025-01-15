@@ -29,6 +29,9 @@ public class SubmissionZone : MonoBehaviour
             gameManager.ModifyTimer(incorrectArtworkTimePenalty);
         }
 
+        // Call the SubmitArtwork method in GameManager to handle submission logic
+        gameManager.SubmitArtwork();
+
         Destroy(artwork.gameObject);
     }
 }

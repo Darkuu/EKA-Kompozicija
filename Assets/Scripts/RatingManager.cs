@@ -1,6 +1,5 @@
 using UnityEngine;
 using TMPro; // Import TextMeshPro namespace
-using UnityEngine.SceneManagement; // Required for FindObjectsSortMode
 
 public class RatingManager : MonoBehaviour
 {
@@ -17,13 +16,23 @@ public class RatingManager : MonoBehaviour
     [Tooltip("Duration of each day in seconds")]
     public float dayDuration = 120f;
 
+    private GameManager gameManager; // Reference to GameManager
+
     private void Awake()
     {
         // Singleton pattern to ensure a single instance
         if (instance == null)
         {
             instance = this;
-            
+
+            // Use FindFirstObjectByType to get the GameManager instance
+            gameManager = FindFirstObjectByType<GameManager>();
+
+            if (gameManager == null)
+            {
+                Debug.LogError("GameManager not found in the scene!");
+            }
+
             // Start the recurring requirement change timer
             InvokeRepeating(nameof(ChangeRequirements), 0f, dayDuration);
         }
@@ -38,21 +47,32 @@ public class RatingManager : MonoBehaviour
     /// </summary>
     private void ChangeRequirements()
     {
-        currentValidStyle = GetRandomValidStyle(); // Set a new valid style
-        UpdateValidStyleDisplay(); // Update the UI
+        if (gameManager != null)
+        {
+            currentValidStyle = GetRandomValidStyle(); // Set a new valid style
+            UpdateValidStyleDisplay(); // Update the UI
 
-        // Update all artworks in the scene with the new valid style
-        UpdateAllArtworkValidity();
+            // Update all artworks in the scene with the new valid style
+            UpdateAllArtworkValidity();
+        }
     }
 
     /// <summary>
-    /// Selects a random valid style from the predefined list.
+    /// Selects a random valid style from the GameManager's list of valid styles.
     /// </summary>
     /// <returns>A random valid style</returns>
     private string GetRandomValidStyle()
     {
-        string[] validStyles = { "Realistic", "Cartoon", "Cubic", "Jugendstil" }; 
-        return validStyles[Random.Range(0, validStyles.Length)];
+        // Use the valid styles from the GameManager
+        if (gameManager != null && gameManager.validStyles.Length > 0)
+        {
+            return gameManager.validStyles[Random.Range(0, gameManager.validStyles.Length)];
+        }
+        else
+        {
+            Debug.LogError("No valid styles available in GameManager!");
+            return "DefaultStyle"; // Fallback style if none are available
+        }
     }
 
     /// <summary>

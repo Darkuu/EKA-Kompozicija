@@ -1,8 +1,8 @@
+using UnityEngine;
+using TMPro;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -28,39 +28,68 @@ public class GameManager : MonoBehaviour
     public MoneyManager moneyManager;
 
     [Header("Valid Styles")]
-    public string[] validStyles = { "StillLife", "Cubic", "Jugendstil", "Futurism" }; // Example of styles
-
+    public string[] validStyles = { "StillLife", "Cubic", "Jugendstil", "Futurism", "Animal" };
 
     private float timer; // Game timer
     private bool gameRunning = true;
-    private float timerSpeedMultiplier = 1f; // Multiplier to make the timer go faster over time
+    private float timerSpeedMultiplier = 1f;
     private List<GameObject> shuffledArtworkPrefabs = new List<GameObject>();
     private int currentIndex = 0;
-    private int submissionsCount = 0; // Track the number of submissions
+    private int submissionsCount = 0;
+    private List<string> unlockedStyles = new List<string>();
+    private int unlockedStylesCount = 0;
+    private float spawnInterval;
+    private RatingManager ratingManager;
+    private float styleChangeTimer = 20f; // Time interval to change styles (in seconds)
 
-    private List<string> unlockedStyles = new List<string>(); // List to track unlocked styles
-    private int unlockedStylesCount = 0; // Track how many styles have been unlocked
-    private float spawnInterval; // Current spawn interval
+    private List<string> usedStyles = new List<string>(); // List to track used styles in the current cycle
 
     private void Start()
     {
-        timer = initialTime; // Set the starting time
-        spawnInterval = initialSpawnInterval; // Initialize the spawn interval
-        gameOverPanel.SetActive(false); // Hide the game over panel
+        timer = initialTime;
+        spawnInterval = initialSpawnInterval;
+        gameOverPanel.SetActive(false);
 
-        // Initialize the slider
         if (timerSlider != null)
         {
             timerSlider.maxValue = initialTime;
             timerSlider.value = initialTime;
         }
 
-        // Shuffle the artwork array before starting the game
-        ShuffleArtwork();
+        ratingManager = FindObjectOfType<RatingManager>();
 
-        // Begin spawning artworks and running the game timer
+        UnlockRandomStyleAndSetActive();
+        ShuffleArtwork();
+        
         StartCoroutine(SpawnArtwork());
         StartCoroutine(GameTimer());
+    }
+
+    private void Update()
+    {
+        // Decrement the style change timer and change style when it reaches 0
+        styleChangeTimer -= Time.deltaTime;
+
+        if (styleChangeTimer <= 0f)
+        {
+            ChangeValidStyle();
+            styleChangeTimer = 20f; // Reset the timer
+        }
+    }
+
+    private void UnlockRandomStyleAndSetActive()
+    {
+        if (validStyles.Length > 0 && unlockedStylesCount < validStyles.Length)
+        {
+            // Pick a random style and ensure it hasn't been unlocked yet
+            string randomStyle = GetRandomUnlockedStyle();
+
+            unlockedStyles.Add(randomStyle);
+            unlockedStylesCount++;
+
+            SetNewValidStyle(randomStyle);
+            ShowStyleUnlockNotification(randomStyle);
+        }
     }
 
     private void ShuffleArtwork()
@@ -81,7 +110,6 @@ public class GameManager : MonoBehaviour
         {
             yield return new WaitForSeconds(spawnInterval);
 
-            // Select artwork from the shuffled list
             GameObject selectedArtwork = shuffledArtworkPrefabs[currentIndex];
             spawnSound.Play();
             Instantiate(selectedArtwork, spawnLocation.position, Quaternion.identity);
@@ -90,7 +118,7 @@ public class GameManager : MonoBehaviour
             if (currentIndex >= shuffledArtworkPrefabs.Count)
             {
                 currentIndex = 0;
-                ShuffleArtwork(); // Reshuffle artwork for the next loop
+                ShuffleArtwork();
             }
         }
     }
@@ -130,41 +158,44 @@ public class GameManager : MonoBehaviour
 
     private void UnlockStyle()
     {
-        // Ensure we don't unlock more styles than are available
-        if (unlockedStylesCount < validStyles.Length) // Use .Length instead of .Count for arrays
+        if (unlockedStylesCount < validStyles.Length)
         {
-            // Get the next style to unlock
             string newStyle = validStyles[unlockedStylesCount];
             unlockedStyles.Add(newStyle);
             unlockedStylesCount++;
 
-            // Display the new style unlock message
-            if (styleUnlockText != null)
-            {
-                styleUnlockText.text = $"New style unlocked: {newStyle}";
-                styleUnlockText.gameObject.SetActive(true);
-
-                if (newStyleUnlockAudio != null)
-                {
-                    newStyleUnlockAudio.Play();
-                }
-
-                StartCoroutine(HideStyleUnlockNotification());
-            }
+            SetNewValidStyle(newStyle);
+            ShowStyleUnlockNotification(newStyle);
         }
-        else
+    }
+
+    private void SetNewValidStyle(string newStyle)
+    {
+        if (ratingManager != null)
         {
-            // Optionally, handle the case where all styles are unlocked
-            Debug.Log("All styles have been unlocked.");
+            ratingManager.SetCurrentValidStyle(newStyle);
+        }
+    }
+
+    private void ShowStyleUnlockNotification(string style)
+    {
+        if (styleUnlockText != null)
+        {
+            styleUnlockText.text = $"New style unlocked: {style}";
+            styleUnlockText.gameObject.SetActive(true);
+
+            if (newStyleUnlockAudio != null)
+            {
+                newStyleUnlockAudio.Play();
+            }
+
+            StartCoroutine(HideStyleUnlockNotification());
         }
     }
 
     private void IncreaseGameSpeed()
     {
-        // Reduce spawn interval but ensure it doesn't go below the minimum
         spawnInterval = Mathf.Max(minSpawnInterval, spawnInterval - spawnIntervalReduction);
-
-        // Increase timer speed multiplier
         timerSpeedMultiplier += timerSpeedIncrease;
     }
 
@@ -177,10 +208,9 @@ public class GameManager : MonoBehaviour
     private void EndGame()
     {
         gameRunning = false;
-
-        StopAllCoroutines(); // Stop all active coroutines
-
+        StopAllCoroutines();
         gameOverPanel.SetActive(true);
+
         float totalMoney = moneyManager.GetCurrentMoney();
         scoreText.text = $"Final Score: ${totalMoney:F2}";
 
@@ -189,23 +219,60 @@ public class GameManager : MonoBehaviour
 
     public void ModifyTimer(float amount)
     {
-        // Increase the timer by 10 seconds
-        timer += 10f;
+        timer += amount;
 
-        // Cap the timer to ensure it doesn't exceed initialTime
         if (timer > initialTime) timer = initialTime;
         if (timer < 0) timer = 0;
 
-        // Update the timer slider if it's assigned
         if (timerSlider != null)
         {
             timerSlider.value = timer;
         }
     }
 
-
     public bool IsGameRunning()
     {
         return gameRunning;
+    }
+
+    public int GetSubmissionsCount()
+    {
+        return submissionsCount;
+    }
+
+    // Helper method to get a random unlocked style, ensuring it's not the same as the current style
+    private string GetRandomUnlockedStyle()
+    {
+        string newStyle;
+
+        do
+        {
+            newStyle = validStyles[Random.Range(0, validStyles.Length)];
+        } while (unlockedStyles.Contains(newStyle));
+
+        return newStyle;
+    }
+
+    // This method is now just responsible for changing the style
+    private void ChangeValidStyle()
+    {
+        // Track used styles for the current cycle
+        if (usedStyles.Count == unlockedStyles.Count)
+        {
+            // Reset used styles after all have been used
+            usedStyles.Clear();
+        }
+
+        string newStyle;
+
+        do
+        {
+            newStyle = unlockedStyles[Random.Range(0, unlockedStyles.Count)];
+        } while (usedStyles.Contains(newStyle) || newStyle == ratingManager.currentValidStyle);
+
+        // Add the new style to the used list
+        usedStyles.Add(newStyle);
+
+        SetNewValidStyle(newStyle);
     }
 }

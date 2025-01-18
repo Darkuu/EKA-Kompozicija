@@ -11,7 +11,18 @@ public class StampingTool : MonoBehaviour
     [Tooltip("The trigger zone that the stamp evaluates")]
     public GameObject triggerZoneObject;
 
+    [Header("Audio Settings")]
+    [Tooltip("Sound to play when the stamp is clicked")]
+    public AudioSource stampSound;
+
+    [Header("Sprite Settings")]
+    [Tooltip("Sprite to display when the stamp is clicked")]
+    public Sprite clickedSprite;
+
     private Collider2D triggerZone;
+    private SpriteRenderer spriteRenderer;
+    private Sprite defaultSprite;
+    private bool isCooldownActive = false;
 
     private void Start()
     {
@@ -21,11 +32,39 @@ public class StampingTool : MonoBehaviour
         {
             Debug.LogError("Trigger zone object does not have a Collider2D component attached!");
         }
+
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("No SpriteRenderer found on the StampingTool object!");
+        }
+        else
+        {
+            defaultSprite = spriteRenderer.sprite;
+        }
+
+        if (stampSound == null)
+        {
+            Debug.LogError("No AudioSource assigned to the stampSound field!");
+        }
     }
 
     private void OnMouseDown()
     {
+        if (isCooldownActive)
+        {
+            Debug.Log("Cooldown active. Please wait before clicking again.");
+            return;
+        }
+
         Debug.Log("Stamp clicked! Grading artworks in the zone.");
+
+        isCooldownActive = true;
+        Invoke(nameof(ResetCooldown), 0.5f); 
+        stampSound.Play();
+        spriteRenderer.sprite = clickedSprite;
+        
+        Invoke(nameof(RevertSprite), 0.2f); 
         GradeArtworksInZone();
     }
 
@@ -62,5 +101,15 @@ public class StampingTool : MonoBehaviour
         {
             Debug.Log("Incorrect rating for " + artwork.gameObject.name);
         }
+    }
+
+    private void RevertSprite()
+    {
+            spriteRenderer.sprite = defaultSprite;
+    }
+
+    private void ResetCooldown()
+    {
+        isCooldownActive = false;
     }
 }

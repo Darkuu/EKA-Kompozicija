@@ -36,7 +36,7 @@ public class RatingManager : MonoBehaviour
     {
         if (validStyleText != null)
         {
-            validStyleText.text = $"Current Style: {currentValidStyle}";
+            validStyleText.text = $"{currentValidStyle}";
         }
     }
 }

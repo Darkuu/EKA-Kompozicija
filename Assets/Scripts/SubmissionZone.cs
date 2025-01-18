@@ -7,6 +7,10 @@ public class SubmissionZone : MonoBehaviour
 
     public MoneyManager moneyManager;
     public GameManager gameManager;
+    
+    [Header("Submission sounds")]
+    public AudioSource submitSoundPositive;
+    public AudioSource submitSoundNegative;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -23,15 +27,14 @@ public class SubmissionZone : MonoBehaviour
         {
             moneyManager.AddMoney(100f);
             gameManager.ModifyTimer(correctArtworkTimeBonus);
+            submitSoundPositive.Play();
         }
         else
         {
             gameManager.ModifyTimer(incorrectArtworkTimePenalty);
+            submitSoundNegative.Play();
         }
-
-        // Call the SubmitArtwork method in GameManager to handle submission logic
         gameManager.SubmitArtwork();
-
         Destroy(artwork.gameObject);
     }
 }

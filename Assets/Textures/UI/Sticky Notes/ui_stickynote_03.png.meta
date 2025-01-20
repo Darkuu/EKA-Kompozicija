@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      ui_stickynote_03_0: 4955090558373878312
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

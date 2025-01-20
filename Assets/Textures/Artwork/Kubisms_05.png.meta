@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Kubisms_05_0: -8212639540482821549
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

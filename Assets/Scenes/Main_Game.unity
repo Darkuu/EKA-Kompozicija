@@ -10353,7 +10353,6 @@ MonoBehaviour:
   submissionsPerUnlock: 10
   artworkPrefabs:
   - {fileID: 8224165700722819230, guid: bc972038c917b1742bccd55cfd3f9a24, type: 3}
-  - {fileID: 5719926005828264685, guid: f226962dda483144f8f22bf10a6de8ef, type: 3}
   - {fileID: 7971593921195279293, guid: 408d5295586fb104e93e75aca740bf11, type: 3}
   - {fileID: 5807729610980832261, guid: a97b89288eb152d42b7b1bdf054dbb69, type: 3}
   - {fileID: 4454345461835679211, guid: 3167893864721a64797705541f9cb1c4, type: 3}

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7380502121275242882}
   - component: {fileID: 8028539044560532252}
   m_Layer: 0
-  m_Name: Animal_04
+  m_Name: Invalid_07
   m_TagString: Artwork
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

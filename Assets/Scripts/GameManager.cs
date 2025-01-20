@@ -32,6 +32,7 @@ public class GameManager : MonoBehaviour
 
     private float timer; // Game timer
     private bool gameRunning = true;
+    private bool isTutorialMode = true; // Tutorial mode flag
     private float timerSpeedMultiplier = 1f;
     private List<GameObject> shuffledArtworkPrefabs = new List<GameObject>();
     private int currentIndex = 0;
@@ -61,12 +62,13 @@ public class GameManager : MonoBehaviour
         UnlockRandomStyleAndSetActive();
         ShuffleArtwork();
         
-        StartCoroutine(SpawnArtwork());
-        StartCoroutine(GameTimer());
+        StartCoroutine(SpawnArtwork()); // Start spawning in tutorial mode
     }
 
     private void Update()
     {
+        if (isTutorialMode) return; // Do nothing during tutorial mode
+
         // Decrement the style change timer and change style when it reaches 0
         styleChangeTimer -= Time.deltaTime;
 
@@ -105,6 +107,18 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator SpawnArtwork()
     {
+        if (isTutorialMode)
+        {
+            // Spawn only one artwork for the tutorial
+            if (shuffledArtworkPrefabs.Count > 0)
+            {
+                GameObject selectedArtwork = shuffledArtworkPrefabs[currentIndex];
+                spawnSound.Play();
+                Instantiate(selectedArtwork, spawnLocation.position, Quaternion.identity);
+            }
+            yield break; // Stop further spawning during tutorial
+        }
+
         while (gameRunning)
         {
             yield return new WaitForSeconds(spawnInterval);
@@ -129,13 +143,15 @@ public class GameManager : MonoBehaviour
     {
         while (timer > 0 && gameRunning)
         {
-            timer -= Time.deltaTime * timerSpeedMultiplier;
-
-            if (timerSlider != null)
+            if (!isTutorialMode)
             {
-                timerSlider.value = timer;
-            }
+                timer -= Time.deltaTime * timerSpeedMultiplier;
 
+                if (timerSlider != null)
+                {
+                    timerSlider.value = timer;
+                }
+            }
             yield return null;
         }
 
@@ -150,6 +166,15 @@ public class GameManager : MonoBehaviour
         if (!gameRunning) return;
 
         submissionsCount++;
+
+        // End tutorial mode on the first submission
+        if (isTutorialMode)
+        {
+            isTutorialMode = false; // Exit tutorial mode
+            StartCoroutine(GameTimer()); // Start the timer
+            StartCoroutine(SpawnArtwork()); // Resume spawning artwork
+            return; // Skip further processing for the first submission
+        }
 
         if (submissionsCount % submissionsPerUnlock == 0)
         {

@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      renesanse_2_0: -6289794732538690649
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
